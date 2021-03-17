@@ -1,3 +1,4 @@
+#Flappy Bird Game
 import random #For generating random numbers
 import sys # sys.exit to exit the program
 import pygame
@@ -6,21 +7,21 @@ from pygame.locals import * #Basic pygame imports
 #Globle Variables from game 
 #Frames per Seconds (images rendering)
 FPS = 32
-SCREENWIDTH =289
-SCREENHEIGHT = 511
+SCREENWIDTH =289 
+SCREENHEIGHT = 511 
 SCREEN = pygame.display.set_mode((SCREENWIDTH ,SCREENHEIGHT))
 GROUNDY = SCREENHEIGHT * 0.8
 GAME_SPRITES = {}
 GAME_AUDIO = {}
-PLAYER = 'Gallery/Sprites/bird.png'
+BIRD = 'Gallery/Sprites/bird.png'
 BACKGROUND = 'Gallery/Sprites/background.png'
 PIPE = 'Gallery/Sprites/pipe.png'
 
 def welcomeScreen():
     """Shows Welcome Images in Screen"""
-    playerx = int(SCREENWIDTH/5)
-    playery = int((SCREENHEIGHT - GAME_SPRITES['player'].get_height())/2)
-    messagex = int((SCREENWIDTH - GAME_SPRITES['message'].get_width())/2)
+    birdx = int(SCREENWIDTH/5) #289/2 = 57 % 
+    birdy = int((SCREENHEIGHT - GAME_SPRITES['bird'].get_height())/2) # 511 - birdheight /2 
+    messagex = int((SCREENWIDTH - GAME_SPRITES['message'].get_width())/2) 
     messagey = int(SCREENHEIGHT * 0.13)
     basex = 0
     while True:
@@ -35,7 +36,7 @@ def welcomeScreen():
                 return
             else:
                 SCREEN.blit(GAME_SPRITES['background'],(0,0))
-                SCREEN.blit(GAME_SPRITES['player'],(playerx,playery ))
+                SCREEN.blit(GAME_SPRITES['bird'],(birdx,birdy ))
                 SCREEN.blit(GAME_SPRITES['message'],(messagex,messagey ))
                 SCREEN.blit(GAME_SPRITES['base'],(basex,GROUNDY ))
                 pygame.display.update()
@@ -43,8 +44,8 @@ def welcomeScreen():
 
 def mainGame():
     score = 0 
-    playerx = int(SCREENWIDTH/5)
-    playery = int(SCREENWIDTH/2)
+    birdx = int(SCREENWIDTH/5)
+    birdy = int(SCREENWIDTH/2)
     basex = 0
 
     #Create 2 pipes for blitting(set) on the Screen
@@ -65,14 +66,14 @@ def mainGame():
     #Velocity of x pipe 
     pipeVelx = -4
 
-    playerVelY = -9
-    playerMaxVelY = 10
-    playerMinVelY = -8
-    playerAccY = 1
+    birdVelY = -9
+    birdMaxVelY = 10
+    birdMinVelY = -8
+    birdAccY = 1
 
 
-    playerFlapAccv = -8 #velocity (speed of the bird while flapping)
-    playerFlapped = False #it is True only when the bird is flapping 
+    birdFlapAccv = -8 #velocity (speed of the bird while flapping)
+    birdFlapped = False #it is True only when the bird is flapping 
 
     while True:
         for event in pygame.event.get():
@@ -80,32 +81,32 @@ def mainGame():
                 pygame.quit()
                 sys.exit()
             if event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
-                if playery > 0 :
-                    playerVelY = playerFlapAccv
-                    playerFlapped = True
+                if birdy > 0 :
+                    birdVelY = birdFlapAccv
+                    birdFlapped = True
                     GAME_AUDIO['wing'].play()
 
-        crashTest = isCollide(playerx, playery ,upperPipes ,lowerPipes) #this function will return true if player crash
+        crashTest = isCollide(birdx, birdy ,upperPipes ,lowerPipes) #this function will return true if bird crash
         if crashTest:
             return
 
 
         #Check for Score
-        playerMidPos = playerx + GAME_SPRITES['player'].get_width()/2
+        birdMidPos = birdx + GAME_SPRITES['bird'].get_width()/2
         for pipe in upperPipes:
             pipMidPos = pipe['x'] + GAME_SPRITES['pipe'][0].get_width()/2
-            if pipMidPos<=playerMidPos<pipMidPos +4:
+            if pipMidPos<=birdMidPos<pipMidPos +4:
                 score += 1
                 print("Your Score is ",score)
                 GAME_AUDIO['point'].play()
 
-        if playerMinVelY < playerMaxVelY and not playerFlapped:
-            playerVelY += playerAccY
+        if birdMinVelY < birdMaxVelY and not birdFlapped:
+            birdVelY += birdAccY
 
-        if playerFlapped:
-            playerFlapped = False
-        playerHeight = GAME_SPRITES['player'].get_height()
-        playery = playery + min(playerVelY, GROUNDY - playery - playerHeight)
+        if birdFlapped:
+            birdFlapped = False
+        birdHeight = GAME_SPRITES['bird'].get_height()
+        birdy = birdy + min(birdVelY, GROUNDY - birdy - birdHeight)
 
 
         #Move pipes to Left
@@ -132,7 +133,7 @@ def mainGame():
             SCREEN.blit(GAME_SPRITES['pipe'][1],(lowerPipe['x'], lowerPipe['y']))
             
         SCREEN.blit(GAME_SPRITES['base'],(basex, GROUNDY))
-        SCREEN.blit(GAME_SPRITES['player'],(playerx, playery))
+        SCREEN.blit(GAME_SPRITES['bird'],(birdx, birdy))
         myDigits = [int(x) for x in list(str(score))]
         width = 0
         for digit in myDigits:
@@ -145,19 +146,19 @@ def mainGame():
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
-def isCollide(playerx, playery ,upperPipes ,lowerPipes):
-    if playery > GROUNDY - 25 or playery < 0:
+def isCollide(birdx, birdy ,upperPipes ,lowerPipes):
+    if birdy > GROUNDY - 25 or birdy < 0:
         GAME_AUDIO['hit'].play()
         return True
 
 
     for pipe in upperPipes:
         pipeHeight = GAME_SPRITES['pipe'][0].get_height()
-        if (playery < pipeHeight + pipe['y'] and abs(playerx - pipe['x'])< GAME_SPRITES['pipe'][0].get_width()):
+        if (birdy < pipeHeight + pipe['y'] and abs(birdx - pipe['x'])< GAME_SPRITES['pipe'][0].get_width()):
             GAME_AUDIO['hit'].play()
             return True
     for pipe in lowerPipes:
-        if (playery + GAME_SPRITES['player'].get_height() > pipe['y']) and abs(playerx - pipe['x']) < GAME_SPRITES['pipe'][0].get_width():
+        if (birdy + GAME_SPRITES['bird'].get_height() > pipe['y']) and abs(birdx - pipe['x']) < GAME_SPRITES['pipe'][0].get_width():
             GAME_AUDIO['hit'].play()
             return True
 
@@ -210,7 +211,7 @@ if __name__ == "__main__":
     GAME_AUDIO['wing'] = pygame.mixer.Sound('Gallery/audio/wing.wav')
 
     GAME_SPRITES['background'] = pygame.image.load(BACKGROUND).convert()
-    GAME_SPRITES['player'] = pygame.image.load(PLAYER).convert_alpha()
+    GAME_SPRITES['bird'] = pygame.image.load(BIRD).convert_alpha()
 
     while True:
         welcomeScreen() #Shows Welcome screen to the user until he presses a button
